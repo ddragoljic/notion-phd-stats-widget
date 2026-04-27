@@ -20,9 +20,8 @@
   .btn:hover { background: #f7f6f3; }
   .btn-danger { border-color: #f09595; color: #a32d2d; }
   .btn-danger:hover { background: #fcebeb; }
-  .error-box { background: #fcebeb; border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 12px; color: #a32d2d; margin: 0.75rem 0; }
+  .error-box { background: #fcebeb; border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 12px; color: #a32d2d; margin: 0.75rem 0; line-height: 1.6; }
   .updated { font-size: 11px; color: #b4b2a9; margin-top: 0.4rem; }
-
   .setup-card { background: #f7f6f3; border-radius: 10px; padding: 1.25rem; }
   .setup-title { font-size: 15px; font-weight: 500; color: #37352f; margin-bottom: 6px; }
   .setup-desc { font-size: 13px; color: #787774; margin-bottom: 1rem; line-height: 1.6; }
@@ -34,18 +33,18 @@
 </style>
 </head>
 <body>
-
+ 
 <div id="setup-view">
   <div class="setup-card">
     <div class="setup-title">Connect your Notion workspace</div>
-    <div class="setup-desc">Enter your Notion API token below. It'll be saved in your browser only — it never touches GitHub or any server.</div>
+    <div class="setup-desc">Enter your Notion API token below. It's saved in your browser only — it never touches GitHub or any server.</div>
     <label class="setup-label">Notion API token</label>
     <input class="setup-input" type="password" id="token-input" placeholder="ntn_..." />
     <div id="setup-error"></div>
     <button class="btn btn-primary" onclick="saveToken()">Save & load stats</button>
   </div>
 </div>
-
+ 
 <div id="stats-view" style="display:none;">
   <div class="title">PhD progress</div>
   <div class="stats-grid">
@@ -62,17 +61,18 @@
     <button class="btn btn-danger" onclick="resetToken()">Reset token</button>
   </div>
 </div>
-
+ 
 <script>
+const PROXY = "https://notion-phd-proxy.ddragoljic99.workers.dev";
 const DB = {
   experiments: "34f8639df38480f0a97cde2df914a695",
   papers: "34f8639df3848056a6f1c10cc5bd36e8",
   conferences: "34f8639df384807db46be575e1e1702d",
   reading: "34f8639df38480dcb59fce6544790c3b"
 };
-
+ 
 function getToken() { return localStorage.getItem("notion_phd_token"); }
-
+ 
 function saveToken() {
   const val = document.getElementById("token-input").value.trim();
   if (!val.startsWith("ntn_") && !val.startsWith("secret_")) {
@@ -82,28 +82,32 @@ function saveToken() {
   localStorage.setItem("notion_phd_token", val);
   showStats();
 }
-
+ 
 function resetToken() {
   localStorage.removeItem("notion_phd_token");
   document.getElementById("stats-view").style.display = "none";
   document.getElementById("setup-view").style.display = "block";
   document.getElementById("token-input").value = "";
 }
-
+ 
 function showStats() {
   document.getElementById("setup-view").style.display = "none";
   document.getElementById("stats-view").style.display = "block";
   fetchStats();
 }
-
+ 
 async function countAll(dbId, filter) {
   const TOKEN = getToken();
   let count = 0, cursor = undefined, hasMore = true;
   while (hasMore) {
     const body = { page_size: 100, ...(filter ? { filter } : {}), ...(cursor ? { start_cursor: cursor } : {}) };
-    const res = await fetch(`https://api.notion.com/v1/databases/${dbId}/query`, {
+    const res = await fetch(`${PROXY}/proxy/v1/databases/${dbId}/query`, {
       method: "POST",
-      headers: { "Authorization": `Bearer ${TOKEN}`, "Notion-Version": "2022-06-28", "Content-Type": "application/json" },
+      headers: {
+        "Authorization": `Bearer ${TOKEN}`,
+        "Notion-Version": "2022-06-28",
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(body)
     });
     const data = await res.json();
@@ -114,15 +118,15 @@ async function countAll(dbId, filter) {
   }
   return count;
 }
-
+ 
 function setStatus(msg, isError) {
   document.getElementById("status-area").innerHTML = isError
     ? `<div class="error-box">${msg}</div>`
     : `<div class="status-bar"><div class="status-dot" style="background:#1D9E75"></div><span class="status-text">${msg}</span></div>`;
 }
-
+ 
 function setStat(id, val) { document.getElementById(id).textContent = val; }
-
+ 
 async function fetchStats() {
   setStatus("Fetching from Notion...");
   ["stat-experiments","stat-published","stat-inprogress","stat-conferences","stat-read"].forEach(id => setStat(id, "…"));
@@ -146,12 +150,13 @@ async function fetchStats() {
     setStatus("Live from your Notion databases");
     document.getElementById("updated-text").textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
   } catch (err) {
-    setStatus(`Could not connect to Notion — check your token or database connections. ${err.message}`, true);
+    setStatus(`Could not connect to Notion — ${err.message}`, true);
     ["stat-experiments","stat-published","stat-inprogress","stat-conferences","stat-read"].forEach(id => setStat(id, "—"));
   }
 }
-
+ 
 if (getToken()) { showStats(); }
 </script>
 </body>
 </html>
+ 
