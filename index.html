@@ -33,7 +33,7 @@
 </style>
 </head>
 <body>
- 
+
 <div id="setup-view">
   <div class="setup-card">
     <div class="setup-title">Connect your Notion workspace</div>
@@ -44,7 +44,7 @@
     <button class="btn btn-primary" onclick="saveToken()">Save & load stats</button>
   </div>
 </div>
- 
+
 <div id="stats-view" style="display:none;">
   <div class="title">PhD progress</div>
   <div class="stats-grid">
@@ -61,7 +61,7 @@
     <button class="btn btn-danger" onclick="resetToken()">Reset token</button>
   </div>
 </div>
- 
+
 <script>
 const PROXY = "https://notion-phd-proxy.ddragoljic99.workers.dev";
 const DB = {
@@ -70,9 +70,9 @@ const DB = {
   conferences: "34f8639df384807db46be575e1e1702d",
   reading: "34f8639df38480dcb59fce6544790c3b"
 };
- 
+
 function getToken() { return localStorage.getItem("notion_phd_token"); }
- 
+
 function saveToken() {
   const val = document.getElementById("token-input").value.trim();
   if (!val.startsWith("ntn_") && !val.startsWith("secret_")) {
@@ -82,20 +82,20 @@ function saveToken() {
   localStorage.setItem("notion_phd_token", val);
   showStats();
 }
- 
+
 function resetToken() {
   localStorage.removeItem("notion_phd_token");
   document.getElementById("stats-view").style.display = "none";
   document.getElementById("setup-view").style.display = "block";
   document.getElementById("token-input").value = "";
 }
- 
+
 function showStats() {
   document.getElementById("setup-view").style.display = "none";
   document.getElementById("stats-view").style.display = "block";
   fetchStats();
 }
- 
+
 async function countAll(dbId, filter) {
   const TOKEN = getToken();
   let count = 0, cursor = undefined, hasMore = true;
@@ -118,29 +118,29 @@ async function countAll(dbId, filter) {
   }
   return count;
 }
- 
+
 function setStatus(msg, isError) {
   document.getElementById("status-area").innerHTML = isError
     ? `<div class="error-box">${msg}</div>`
     : `<div class="status-bar"><div class="status-dot" style="background:#1D9E75"></div><span class="status-text">${msg}</span></div>`;
 }
- 
+
 function setStat(id, val) { document.getElementById(id).textContent = val; }
- 
+
 async function fetchStats() {
   setStatus("Fetching from Notion...");
   ["stat-experiments","stat-published","stat-inprogress","stat-conferences","stat-read"].forEach(id => setStat(id, "…"));
   try {
-    const inProgressStatuses = ["Outlining","Drafting","Internal review","Submitted","In revision"];
+    const inProgressStatuses = ["outlining","drafting","in revision"];
     const [experiments, published, conferences, read] = await Promise.all([
       countAll(DB.experiments),
-      countAll(DB.papers, { property: "Status", status: { equals: "Published" } }),
-      countAll(DB.conferences, { property: "Status", status: { equals: "Attended" } }),
-      countAll(DB.reading, { property: "Status", status: { equals: "Done" } })
+      countAll(DB.papers, { property: "status", status: { equals: "published" } }),
+      countAll(DB.conferences, { property: "status", status: { equals: "attended" } }),
+      countAll(DB.reading, { property: "status", status: { equals: "done" } })
     ]);
     let inProgress = 0;
     for (const s of inProgressStatuses) {
-      inProgress += await countAll(DB.papers, { property: "Status", status: { equals: s } });
+      inProgress += await countAll(DB.papers, { property: "status", status: { equals: s } });
     }
     setStat("stat-experiments", experiments);
     setStat("stat-published", published);
@@ -154,9 +154,8 @@ async function fetchStats() {
     ["stat-experiments","stat-published","stat-inprogress","stat-conferences","stat-read"].forEach(id => setStat(id, "—"));
   }
 }
- 
+
 if (getToken()) { showStats(); }
 </script>
 </body>
 </html>
- 
