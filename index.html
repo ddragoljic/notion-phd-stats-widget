@@ -100,7 +100,11 @@ async function countAll(dbId, filter) {
   const TOKEN = getToken();
   let count = 0, cursor = undefined, hasMore = true;
   while (hasMore) {
-    const body = { page_size: 100, ...(filter ? { filter } : {}), ...(cursor ? { start_cursor: cursor } : {}) };
+    const body = {
+      page_size: 100,
+      ...(filter ? { filter } : {}),
+      ...(cursor ? { start_cursor: cursor } : {})
+    };
     const res = await fetch(`${PROXY}/proxy/v1/databases/${dbId}/query`, {
       method: "POST",
       headers: {
@@ -131,22 +135,28 @@ async function fetchStats() {
   setStatus("Fetching from Notion...");
   ["stat-experiments","stat-published","stat-inprogress","stat-conferences","stat-read"].forEach(id => setStat(id, "…"));
   try {
-    const inProgressStatuses = ["outlining","drafting","in revision"];
-    const [experiments, published, conferences, read] = await Promise.all([
-      countAll(DB.experiments),
+    const [
+      experiments,
+      inProgress,
+      read,
+      papersAccepted,
+      papersPublished,
+      conferences
+    ] = await Promise.all([
+      countAll(DB.experiments, { property: "status", status: { equals: "complete" } }),
+      countAll(DB.papers, { property: "status", status: { equals: "in progress" } }),
+      countAll(DB.reading, { property: "status", status: { equals: "complete" } }),
+      countAll(DB.papers, { property: "status", status: { equals: "accepted" } }),
       countAll(DB.papers, { property: "status", status: { equals: "published" } }),
-      countAll(DB.conferences, { property: "status", status: { equals: "attended" } }),
-      countAll(DB.reading, { property: "status", status: { equals: "done" } })
+      countAll(DB.conferences, { property: "status", status: { equals: "attended" } })
     ]);
-    let inProgress = 0;
-    for (const s of inProgressStatuses) {
-      inProgress += await countAll(DB.papers, { property: "status", status: { equals: s } });
-    }
+
     setStat("stat-experiments", experiments);
-    setStat("stat-published", published);
+    setStat("stat-published", papersAccepted + papersPublished);
     setStat("stat-inprogress", inProgress);
     setStat("stat-conferences", conferences);
     setStat("stat-read", read);
+
     setStatus("Live from your Notion databases");
     document.getElementById("updated-text").textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
   } catch (err) {
