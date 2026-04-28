@@ -5,37 +5,119 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PhD Stats</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lora:ital,wght@0,400;1,400&display=swap');
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: transparent; padding: 1rem; }
-  .title { font-size: 11px; font-weight: 500; color: #787774; margin-bottom: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 0.75rem 0; }
-  .stat-card { background: #f7f6f3; border-radius: 8px; padding: 0.85rem 1rem; text-align: center; }
-  .stat-label { font-size: 11px; color: #787774; margin-bottom: 6px; line-height: 1.4; }
-  .stat-number { font-size: 26px; font-weight: 500; color: #37352f; }
+  body { font-family: 'Lora', Georgia, serif; background: transparent; padding: 1.25rem; }
+
+  .card {
+    background: #fdf8f2;
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .watercolor-top {
+    position: absolute; top: -30px; right: -30px;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, rgba(180,200,220,0.18), rgba(210,190,215,0.12), transparent 70%);
+    pointer-events: none;
+  }
+
+  .watercolor-bottom {
+    position: absolute; bottom: -40px; left: -20px;
+    width: 200px; height: 160px; border-radius: 50%;
+    background: radial-gradient(circle at 60% 60%, rgba(210,185,155,0.15), rgba(195,210,190,0.10), transparent 70%);
+    pointer-events: none;
+  }
+
+  .header {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #9a8c7e;
+    margin-bottom: 1.25rem; position: relative;
+  }
+
+  .border-top {
+    height: 2px;
+    background: linear-gradient(to right, transparent, #c8b8a8 20%, #b8c4c0 50%, #c4b0bc 80%, transparent);
+    border-radius: 999px; margin-bottom: 1.5rem;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px; margin: 0.75rem 0; position: relative;
+  }
+
+  .stat-card {
+    background: rgba(255,255,255,0.6);
+    border: 0.5px solid #e8ddd0;
+    border-radius: 10px; padding: 0.85rem 0.75rem; text-align: center;
+  }
+
+  .stat-label {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 11px; color: #a8977f;
+    font-style: italic; margin-bottom: 6px; line-height: 1.4;
+  }
+
+  .stat-number {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 28px; font-weight: 500; color: #5c4f3d;
+  }
+
   .status-bar { display: flex; align-items: center; gap: 8px; margin: 0.75rem 0 0.25rem; }
   .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .status-text { font-size: 12px; color: #787774; }
+  .status-text { font-size: 12px; color: #a8977f; font-style: italic; }
+
   .btn-row { display: flex; gap: 8px; margin-top: 0.75rem; }
-  .btn { font-size: 12px; padding: 5px 14px; cursor: pointer; border: 0.5px solid #d3d1c7; border-radius: 6px; background: white; color: #37352f; }
-  .btn:hover { background: #f7f6f3; }
-  .btn-danger { border-color: #f09595; color: #a32d2d; }
-  .btn-danger:hover { background: #fcebeb; }
-  .error-box { background: #fcebeb; border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 12px; color: #a32d2d; margin: 0.75rem 0; line-height: 1.6; }
-  .updated { font-size: 11px; color: #b4b2a9; margin-top: 0.4rem; }
-  .setup-card { background: #f7f6f3; border-radius: 10px; padding: 1.25rem; }
-  .setup-title { font-size: 15px; font-weight: 500; color: #37352f; margin-bottom: 6px; }
-  .setup-desc { font-size: 13px; color: #787774; margin-bottom: 1rem; line-height: 1.6; }
-  .setup-label { font-size: 12px; color: #37352f; font-weight: 500; margin-bottom: 4px; display: block; }
-  .setup-input { width: 100%; padding: 8px 10px; font-size: 13px; border: 0.5px solid #d3d1c7; border-radius: 6px; font-family: monospace; color: #37352f; background: white; margin-bottom: 0.75rem; }
-  .setup-input:focus { outline: none; border-color: #9FE1CB; }
-  .btn-primary { background: #37352f; color: white; border-color: #37352f; }
-  .btn-primary:hover { background: #2f2d28; }
+
+  .btn {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 12px; padding: 5px 14px; cursor: pointer;
+    border: 0.5px solid #d4c4b0; border-radius: 6px;
+    background: rgba(255,255,255,0.7); color: #7a6a55;
+    font-style: italic;
+  }
+  .btn:hover { background: #f0e8dc; }
+  .btn-danger { border-color: #d4b0b0; color: #9a5555; }
+  .btn-danger:hover { background: #f5e8e8; }
+
+  .error-box {
+    background: #f8eded; border-radius: 8px;
+    padding: 0.6rem 0.9rem; font-size: 12px;
+    color: #9a5555; margin: 0.75rem 0; line-height: 1.6;
+    font-style: italic;
+  }
+
+  .updated { font-size: 11px; color: #b0a090; margin-top: 0.4rem; font-style: italic; }
+
+  .setup-card { background: #fdf8f2; border-radius: 10px; padding: 1.25rem; }
+  .setup-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 17px; font-weight: 500; color: #5c4f3d; margin-bottom: 6px;
+  }
+  .setup-desc { font-size: 13px; color: #9a8c7e; margin-bottom: 1rem; line-height: 1.6; font-style: italic; }
+  .setup-label { font-size: 12px; color: #7a6a55; font-weight: 500; margin-bottom: 4px; display: block; }
+  .setup-input {
+    width: 100%; padding: 8px 10px; font-size: 13px;
+    border: 0.5px solid #d4c4b0; border-radius: 6px;
+    font-family: monospace; color: #5c4f3d;
+    background: rgba(255,255,255,0.8); margin-bottom: 0.75rem;
+  }
+  .setup-input:focus { outline: none; border-color: #b8c4c0; }
+  .btn-primary { background: #7a6a55; color: #fdf8f2; border-color: #7a6a55; font-style: normal; }
+  .btn-primary:hover { background: #6a5a47; }
 </style>
 </head>
 <body>
+<div class="card">
+  <div class="watercolor-top"></div>
+  <div class="watercolor-bottom"></div>
 
-<div id="setup-view">
-  <div class="setup-card">
+  <div id="setup-view">
     <div class="setup-title">Connect your Notion workspace</div>
     <div class="setup-desc">Enter your Notion API token below. It's saved in your browser only — it never touches GitHub or any server.</div>
     <label class="setup-label">Notion API token</label>
@@ -43,22 +125,23 @@
     <div id="setup-error"></div>
     <button class="btn btn-primary" onclick="saveToken()">Save & load stats</button>
   </div>
-</div>
 
-<div id="stats-view" style="display:none;">
-  <div class="title">PhD progress</div>
-  <div class="stats-grid">
-    <div class="stat-card"><div class="stat-label">Experiments run</div><div class="stat-number" id="stat-experiments">—</div></div>
-    <div class="stat-card"><div class="stat-label">Papers published</div><div class="stat-number" id="stat-published">—</div></div>
-    <div class="stat-card"><div class="stat-label">Papers in progress</div><div class="stat-number" id="stat-inprogress">—</div></div>
-    <div class="stat-card"><div class="stat-label">Conferences attended</div><div class="stat-number" id="stat-conferences">—</div></div>
-    <div class="stat-card"><div class="stat-label">Papers read</div><div class="stat-number" id="stat-read">—</div></div>
-  </div>
-  <div id="status-area"></div>
-  <div class="updated" id="updated-text"></div>
-  <div class="btn-row">
-    <button class="btn" onclick="fetchStats()">Refresh stats</button>
-    <button class="btn btn-danger" onclick="resetToken()">Reset token</button>
+  <div id="stats-view" style="display:none;">
+    <div class="header">PhD Progress</div>
+    <div class="border-top"></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">experiments run</div><div class="stat-number" id="stat-experiments">—</div></div>
+      <div class="stat-card"><div class="stat-label">papers published</div><div class="stat-number" id="stat-published">—</div></div>
+      <div class="stat-card"><div class="stat-label">papers in progress</div><div class="stat-number" id="stat-inprogress">—</div></div>
+      <div class="stat-card"><div class="stat-label">conferences attended</div><div class="stat-number" id="stat-conferences">—</div></div>
+      <div class="stat-card"><div class="stat-label">papers read</div><div class="stat-number" id="stat-read">—</div></div>
+    </div>
+    <div id="status-area"></div>
+    <div class="updated" id="updated-text"></div>
+    <div class="btn-row">
+      <button class="btn" onclick="fetchStats()">refresh</button>
+      <button class="btn btn-danger" onclick="resetToken()">reset token</button>
+    </div>
   </div>
 </div>
 
@@ -76,7 +159,7 @@ function getToken() { return localStorage.getItem("notion_phd_token"); }
 function saveToken() {
   const val = document.getElementById("token-input").value.trim();
   if (!val.startsWith("ntn_") && !val.startsWith("secret_")) {
-    document.getElementById("setup-error").innerHTML = `<div class="error-box">That doesn't look like a valid Notion token — it should start with ntn_ or secret_</div>`;
+    document.getElementById("setup-error").innerHTML = `<div class="error-box">that doesn't look like a valid Notion token — it should start with ntn_ or secret_</div>`;
     return;
   }
   localStorage.setItem("notion_phd_token", val);
@@ -100,18 +183,10 @@ async function countAll(dbId, filter) {
   const TOKEN = getToken();
   let count = 0, cursor = undefined, hasMore = true;
   while (hasMore) {
-    const body = {
-      page_size: 100,
-      ...(filter ? { filter } : {}),
-      ...(cursor ? { start_cursor: cursor } : {})
-    };
+    const body = { page_size: 100, ...(filter ? { filter } : {}), ...(cursor ? { start_cursor: cursor } : {}) };
     const res = await fetch(`${PROXY}/proxy/v1/databases/${dbId}/query`, {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${TOKEN}`,
-        "Notion-Version": "2022-06-28",
-        "Content-Type": "application/json"
-      },
+      headers: { "Authorization": `Bearer ${TOKEN}`, "Notion-Version": "2022-06-28", "Content-Type": "application/json" },
       body: JSON.stringify(body)
     });
     const data = await res.json();
@@ -126,23 +201,16 @@ async function countAll(dbId, filter) {
 function setStatus(msg, isError) {
   document.getElementById("status-area").innerHTML = isError
     ? `<div class="error-box">${msg}</div>`
-    : `<div class="status-bar"><div class="status-dot" style="background:#1D9E75"></div><span class="status-text">${msg}</span></div>`;
+    : `<div class="status-bar"><div class="status-dot" style="background:#b8c4c0"></div><span class="status-text">${msg}</span></div>`;
 }
 
 function setStat(id, val) { document.getElementById(id).textContent = val; }
 
 async function fetchStats() {
-  setStatus("Fetching from Notion...");
+  setStatus("fetching from Notion...");
   ["stat-experiments","stat-published","stat-inprogress","stat-conferences","stat-read"].forEach(id => setStat(id, "…"));
   try {
-    const [
-      experiments,
-      inProgress,
-      read,
-      papersAccepted,
-      papersPublished,
-      conferences
-    ] = await Promise.all([
+    const [experiments, inProgress, read, papersAccepted, papersPublished, conferences] = await Promise.all([
       countAll(DB.experiments, { property: "status", status: { equals: "complete" } }),
       countAll(DB.papers, { property: "status", status: { equals: "in progress" } }),
       countAll(DB.reading, { property: "status", status: { equals: "complete" } }),
@@ -150,17 +218,15 @@ async function fetchStats() {
       countAll(DB.papers, { property: "status", status: { equals: "published" } }),
       countAll(DB.conferences, { property: "status", status: { equals: "attended" } })
     ]);
-
     setStat("stat-experiments", experiments);
     setStat("stat-published", papersAccepted + papersPublished);
     setStat("stat-inprogress", inProgress);
     setStat("stat-conferences", conferences);
     setStat("stat-read", read);
-
-    setStatus("Live from your Notion databases");
-    document.getElementById("updated-text").textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+    setStatus("live from your Notion databases");
+    document.getElementById("updated-text").textContent = `last updated: ${new Date().toLocaleTimeString()}`;
   } catch (err) {
-    setStatus(`Could not connect to Notion — ${err.message}`, true);
+    setStatus(`could not connect to Notion — ${err.message}`, true);
     ["stat-experiments","stat-published","stat-inprogress","stat-conferences","stat-read"].forEach(id => setStat(id, "—"));
   }
 }
