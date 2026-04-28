@@ -11,11 +11,8 @@
   body { font-family: 'Lora', Georgia, serif; background: transparent; padding: 1.25rem; }
 
   .card {
-    background: #fdf8f2;
-    border-radius: 16px;
-    padding: 1.75rem 2rem;
-    position: relative;
-    overflow: hidden;
+    background: #fdf8f2; border-radius: 16px;
+    padding: 1.75rem 2rem; position: relative; overflow: hidden;
   }
 
   .watercolor-top {
@@ -36,7 +33,7 @@
     font-family: 'Playfair Display', Georgia, serif;
     font-size: 11px; letter-spacing: 0.12em;
     text-transform: uppercase; color: #9a8c7e;
-    margin-bottom: 1.25rem; position: relative;
+    margin-bottom: 1rem; position: relative;
   }
 
   .border-top {
@@ -88,13 +85,12 @@
   .error-box {
     background: #f8eded; border-radius: 8px;
     padding: 0.6rem 0.9rem; font-size: 12px;
-    color: #9a5555; margin: 0.75rem 0; line-height: 1.6;
-    font-style: italic;
+    color: #9a5555; margin: 0.75rem 0; line-height: 1.6; font-style: italic;
   }
 
   .updated { font-size: 11px; color: #b0a090; margin-top: 0.4rem; font-style: italic; }
 
-  .setup-card { background: #fdf8f2; border-radius: 10px; padding: 1.25rem; }
+  .setup-card { position: relative; }
   .setup-title {
     font-family: 'Playfair Display', Georgia, serif;
     font-size: 17px; font-weight: 500; color: #5c4f3d; margin-bottom: 6px;
@@ -210,19 +206,30 @@ async function fetchStats() {
   setStatus("fetching from Notion...");
   ["stat-experiments","stat-published","stat-inprogress","stat-conferences","stat-read"].forEach(id => setStat(id, "…"));
   try {
-    const [experiments, inProgress, read, papersAccepted, papersPublished, conferences] = await Promise.all([
+    const [
+      expComplete, expFailed,
+      papersAccepted, papersPublished,
+      papersOutlining, papersDrafting, papersInRevision,
+      conferences,
+      read
+    ] = await Promise.all([
       countAll(DB.experiments, { property: "status", status: { equals: "complete" } }),
-      countAll(DB.papers, { property: "status", status: { equals: "in progress" } }),
-      countAll(DB.reading, { property: "status", status: { equals: "complete" } }),
+      countAll(DB.experiments, { property: "status", status: { equals: "failed" } }),
       countAll(DB.papers, { property: "status", status: { equals: "accepted" } }),
       countAll(DB.papers, { property: "status", status: { equals: "published" } }),
-      countAll(DB.conferences, { property: "status", status: { equals: "attended" } })
+      countAll(DB.papers, { property: "status", status: { equals: "outlining" } }),
+      countAll(DB.papers, { property: "status", status: { equals: "drafting" } }),
+      countAll(DB.papers, { property: "status", status: { equals: "in revision" } }),
+      countAll(DB.conferences, { property: "status", status: { equals: "attended" } }),
+      countAll(DB.reading, { property: "status", status: { equals: "done" } })
     ]);
-    setStat("stat-experiments", experiments);
+
+    setStat("stat-experiments", expComplete + expFailed);
     setStat("stat-published", papersAccepted + papersPublished);
-    setStat("stat-inprogress", inProgress);
+    setStat("stat-inprogress", papersOutlining + papersDrafting + papersInRevision);
     setStat("stat-conferences", conferences);
     setStat("stat-read", read);
+
     setStatus("live from your Notion databases");
     document.getElementById("updated-text").textContent = `last updated: ${new Date().toLocaleTimeString()}`;
   } catch (err) {
